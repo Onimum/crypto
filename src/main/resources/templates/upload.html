@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Анализ файла</title>
+    <title>File analyze</title>
 </head>
 <body>
-<h1>Загрузка файла для анализа метаданных</h1>
+<h1>Uploading a file for metadata analysis</h1>
 
 <!-- Форма для загрузки файла -->
 <form action="/api/files/upload" method="post" enctype="multipart/form-data">
     <input type="file" name="file" required />
-    <button type="submit">Анализировать</button>
+    <button type="submit">Analyze</button>
 </form>
 
 <!-- Ошибка (если есть) -->
