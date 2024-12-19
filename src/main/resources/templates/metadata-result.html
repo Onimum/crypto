@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Результат анализа</title>
+</head>
+<body>
+<h1>Результат анализа метаданных</h1>
+<p><strong>Имя файла:</strong> {{ fileName }}</p>
+<h2>Метаданные:</h2>
+<ul>
+  <li th:each="entry : ${metadata.names()}" th:text="${entry} + ': ' + ${metadata.get(entry)}"></li>
+</ul>
+<a href="/files/upload">Вернуться к загрузке</a>
+</body>
+</html>

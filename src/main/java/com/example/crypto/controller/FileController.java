@@ -1,46 +1,42 @@
-//package com.example.crypto.controller;
-//import com.example.crypto.service.DecryptionService;
-//import com.example.crypto.service.EncryptionService;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.core.io.InputStreamResource;
-//import org.springframework.http.HttpHeaders;
-//import org.springframework.http.MediaType;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.multipart.MultipartFile;
-//
-//import javax.crypto.SecretKey;
-//import java.io.ByteArrayInputStream;
-//import java.nio.file.Files;
-//import java.nio.file.Path;
-//import java.nio.file.Paths;
-//
-//@RestController
-//@RequestMapping("/api/file")
-//public class FileController {
-//
-//    @Autowired
-//    private EncryptionService encryptionService;
-//
-//    @Autowired
-//    private DecryptionService decryptionService;
-//
-////    @PostMapping("/upload")
-////    public byte[] uploadFile(@RequestParam("file") MultipartFile file, @RequestParam SecretKey secretKey) throws Exception {
-////        // Преобразуем имя файла в Path для использования в методе шифрования
-////        Path filePath = Paths.get(file.getOriginalFilename());
-////
-////        return encryptionService.encryptFile(filePath, secretKey);
-////    }
-//
-//    @PostMapping("/decrypt")
-//    public ResponseEntity<InputStreamResource> decryptFile(@RequestParam("file") MultipartFile file, @RequestParam SecretKey secretKey) throws Exception {
-//        byte[] encryptedData = file.getBytes();
-//        byte[] decryptedData = decryptionService.decryptFile(encryptedData, secretKey);
-//
-//        return ResponseEntity.ok()
-//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getOriginalFilename() + "\"")
-//                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                .body(new InputStreamResource(new ByteArrayInputStream(decryptedData)));
-//    }
-//}
+package com.example.crypto.controller;
+
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.sax.BodyContentHandler;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStream;
+
+@Controller
+@RequestMapping("api/files/upload")
+public class FileController {
+
+  @RequestMapping
+  public String uploadPage() {
+    return "upload";
+  }
+
+  @PostMapping
+  public String analyzeFileMetadata(@RequestParam("file") MultipartFile file, Model model) {
+    try (InputStream inputStream = file.getInputStream()) {
+      // Используем Apache Tika для анализа
+      Metadata metadata = new Metadata();
+      BodyContentHandler handler = new BodyContentHandler();
+      AutoDetectParser parser = new AutoDetectParser();
+
+      parser.parse(inputStream, handler, metadata);
+
+      model.addAttribute("fileName", file.getOriginalFilename());
+      model.addAttribute("metadata", metadata);
+      return "metadata-result";
+    } catch (Exception e) {
+      model.addAttribute("error", "Ошибка при анализе файла: " + e.getMessage());
+      return "error";
+    }
+  }
+}

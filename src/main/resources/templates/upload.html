@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализ файла</title>
+</head>
+<body>
+<h1>Загрузка файла для анализа метаданных</h1>
+
+<!-- Форма для загрузки файла -->
+<form action="/api/files/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" required />
+    <button type="submit">Анализировать</button>
+</form>
+
+<!-- Ошибка (если есть) -->
+<div th:if="${error != null}" style="color: red;">
+    <p th:text="${error}"></p>
+</div>
+
+<!-- Результат анализа -->
+<div th:if="${metadata != null}">
+    <h2>Result of analyze metadata</h2>
+    <p><strong>File name:</strong> <span th:text="${fileName}"></span></p>
+    <ul>
+        <li th:each="entry : ${metadata.names()}" th:text="${entry} + ': ' + ${metadata.get(entry)}"></li>
+    </ul>
+</div>
+</body>
+</html>

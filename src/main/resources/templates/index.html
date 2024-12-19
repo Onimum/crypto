@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encrypt/Decrypt Text</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="container">
+  <h1 id="operation-title">Encrypt Text</h1>
+
+  <div class="tabs">
+    <button class="tab-button active" onclick="setOperation('encryption')">Encryption</button>
+    <button class="tab-button" onclick="setOperation('decryption')">Decryption</button>
+  </div>
+
+  <!-- Форма -->
+  <form action="/api/text/home" method="post">
+    <input type="hidden" id="operation" name="operation" value="encryption"> <!-- Скрытое поле для передачи операции -->
+
+    <label for="text" id="text-label">Text:</label>
+    <input type="text" id="text" name="text" required>
+
+    <label for="secretKey" id="secretKey-label">Secret Key:</label>
+    <input type="text" id="secretKey" name="secretKey" required>
+
+    <label for="algorithm" id="algorithm-label">Algorithm:</label>
+    <select id="algorithm" name="algorithm">
+      <option value="AES">AES</option>
+      <option value="DES">DES</option>
+    </select>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <!-- Место для вывода результата -->
+  <div class="result">
+    <h2>Result:</h2>
+    <p th:text="${resultText}"></p>
+    <p class="error" th:text="${error}"></p> <!-- Если произошла ошибка -->
+  </div>
+</div>
+
+<script>
+  // Функция для изменения состояния операции
+  function setOperation(operation) {
+    const form = document.querySelector('form');
+    const operationField = document.getElementById('operation');
+    const title = document.getElementById('operation-title');
+    const textLabel = document.getElementById('text-label');
+    const secretKeyLabel = document.getElementById('secretKey-label');
+    const algorithmLabel = document.getElementById('algorithm-label');
+
+    if (operation === 'decryption') {
+      operationField.value = 'decryption';
+      title.innerText = 'Decrypt Text';
+      textLabel.innerText = 'Encrypted Text:';
+      secretKeyLabel.innerText = 'Secret Key:';
+      algorithmLabel.style.display = 'none'; // Скрыть выбор алгоритма при дешифровании
+    } else {
+      operationField.value = 'encryption';
+      title.innerText = 'Encrypt Text';
+      textLabel.innerText = 'Text:';
+      secretKeyLabel.innerText = 'Secret Key:';
+      algorithmLabel.style.display = 'block'; // Показать выбор алгоритма при шифровании
+    }
+
+    // Обновляем активную вкладку
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.classList.remove('active');
+    });
+    document.querySelector(`button[onclick="setOperation('${operation}')"]`).classList.add('active');
+  }
+</script>
+</body>
+</html>

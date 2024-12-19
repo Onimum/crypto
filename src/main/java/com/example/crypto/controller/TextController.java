@@ -1,38 +1,58 @@
 package com.example.crypto.controller;
 
-
-import com.example.crypto.entity.DecryptRequest;
-import com.example.crypto.entity.EncryptRequest;
 import com.example.crypto.service.EncryptionService;
 import com.example.crypto.service.DecryptionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.crypto.service.SecretKeyGenerator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
+@RequiredArgsConstructor
 @RequestMapping("/api/text")
 public class TextController {
 
-    @Autowired
-    private EncryptionService encryptionService;
+    private final EncryptionService encryptionService;
+    private final DecryptionService decryptionService;
 
-    @Autowired
-    private DecryptionService decryptionService;
+    @GetMapping("/home")
+    public String index(Model model) {
+        model.addAttribute("activeTab", "encryption");
+        return "index";
+    }
 
-    @PostMapping("/encrypt")
-    public String encryptText(@RequestBody EncryptRequest request) {
+    @PostMapping("/home")
+    public String processText(
+        @RequestParam("text") String text,
+        @RequestParam("secretKey") String secretKey,
+        @RequestParam("algorithm") String algorithm,
+        @RequestParam("operation") String operation,
+        Model model) {
         try {
-            return encryptionService.encryptText(request.getText(), request.getSecretKey());
+            if ("encryption".equalsIgnoreCase(operation)) {
+                String encryptedText = encryptionService.encryptText(text, secretKey, algorithm);
+                model.addAttribute("resultText", encryptedText);
+                model.addAttribute("operation", "encryption");
+            } else if ("decryption".equalsIgnoreCase(operation)) {
+                String decryptedText = decryptionService.decryptText(text, secretKey,algorithm);
+                model.addAttribute("resultText", decryptedText);
+                model.addAttribute("operation", "decryption");
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка шифрования текста", e);
+            model.addAttribute("error", "Ошибка: " + e.getMessage());
+        }
+        return "index";
+    }
+
+    @GetMapping("/generate-key")
+    public String generateKey(@RequestParam int length) {
+        try {
+            SecretKeyGenerator keyGenerator = new SecretKeyGenerator();
+            return keyGenerator.generateKey(length);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка генерации ключа: " + e.getMessage(), e);
         }
     }
 
-    @PostMapping("/decrypt")
-    public String decryptText(@RequestBody DecryptRequest request) {
-        try {
-            return decryptionService.decryptText(request.getEncryptedText(), request.getSecretKey());
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка дешифрования текста", e);
-        }
-    }
 }
